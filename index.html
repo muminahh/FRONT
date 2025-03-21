@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .weather-info {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: left;
+            display: inline-block;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Global Weather App</h1>
+    <p>Enter a city, state, or country (e.g., "New York, US" or "London, UK"):</p>
+    <input type="text" id="locationInput" placeholder="e.g., London, uk or New York, us">
+    <button id="getWeatherButton">Get Weather</button>
+
+    <div id="weatherInfo" class="weather-info"></div>
+    <div id="errorMessage" class="error"></div>
+
+    <script>
+        // Replace this with your actual OpenWeatherMap API key
+        const API_KEY = '6f23a1637dd43c5870d79095acb276e1'; // Your API key
+
+        document.getElementById('getWeatherButton').addEventListener('click', () => {
+            const location = document.getElementById('locationInput').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const weatherInfo = document.getElementById('weatherInfo');
+
+            // Clear previous messages
+            errorMessage.textContent = '';
+            weatherInfo.innerHTML = '';
+
+            if (location === '') {
+                errorMessage.textContent = 'Please enter a location (city, state, or country).';
+                return;
+            }
+
+            // Fetch weather data from OpenWeatherMap API
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${API_KEY}&units=metric`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Location not found or API error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Extract relevant weather details
+                    const temperature = data.main.temp;
+                    const humidity = data.main.humidity;
+                    const weatherCondition = data.weather[0].description;
+                    const cityName = data.name;
+                    const countryCode = data.sys.country;
+
+                    // Display weather details
+                    weatherInfo.innerHTML = `
+                        <p><strong>Location:</strong> ${cityName}, ${countryCode}</p>
+                        <p><strong>Temperature:</strong> ${temperature}°C</p>
+                        <p><strong>Humidity:</strong> ${humidity}%</p>
+                        <p><strong>Conditions:</strong> ${weatherCondition}</p>
+                    `;
+                })
+                .catch(error => {
+                    errorMessage.textContent = error.message;
+                });
+        });
+    </script>
+</body>
+</html>
